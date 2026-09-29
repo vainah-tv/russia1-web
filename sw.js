@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='russia1-web-v3';
+const CACHE='russia1-web-v4';
 const BASE=new URL('./',self.location.href);
 const ASSETS=['./','index.html','style.css','app.js','manifest.webmanifest','assets/radio.png','assets/icon-180.png','assets/icon-192.png','assets/icon-512.png'].map(p=>new URL(p,BASE).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS))));

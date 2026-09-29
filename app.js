@@ -8,9 +8,12 @@ const video=document.querySelector('#video'),audio=document.querySelector('#audi
 const status=document.querySelector('#status'),playButton=document.querySelector('#play');
 const muteButton=document.querySelector('#mute'),fullscreen=document.querySelector('#fullscreen');
 let index=0, loaded=false, muted=true;
+let playing=false, connecting=false, startupTimer, generation=0;
+function clearStartupTimer(){clearTimeout(startupTimer);startupTimer=undefined;}
 function media(){return channels[index].radio?audio:video;}
 function updateMute(){muteButton.textContent=muted?'Включить звук':'Выключить звук';muteButton.setAttribute('aria-pressed',String(muted));}
 function selectChannel(next){
+ clearStartupTimer();generation++;loaded=false;playing=false;connecting=false;
  for(const element of [video,audio]){element.autoplay=false;element.pause();element.removeAttribute('src');element.load();}
  index=next;loaded=false;
  video.hidden=!!channels[index].radio;
@@ -21,30 +24,46 @@ function selectChannel(next){
  playButton.textContent=channels[index].radio?'Слушать эфир':'Смотреть эфир';
  status.textContent='Нажмите «'+playButton.textContent+'» для запуска.';
 }
-function start(){
+function start(retry=0, reload=false){
  const element=media();
+ clearStartupTimer();
+ const attempt=++generation;
  if(!element.canPlayType('application/vnd.apple.mpegurl')){
   status.textContent='Этот браузер не поддерживает HLS. На iPhone откройте ссылку в Safari.';return;
  }
- if(!loaded){element.muted=muted;
-  // The initial URL is already in HTML so Safari can begin loading before JS.
-  if(element.getAttribute('src')!==channels[index].url)element.src=channels[index].url;
-  loaded=true;}
+ connecting=true;playing=false;
+ // Initialize the first channel exactly like subsequent channel selections.
+ if(!loaded||reload){
+  loaded=false;element.pause();element.muted=muted;
+  element.src=channels[index].url;element.load();loaded=true;
+ }
  status.textContent='Подключение к трансляции…';
+ playButton.textContent='Запустить эфир';
+ startupTimer=setTimeout(()=>{
+  if(attempt!==generation||playing)return;
+  if(retry===0){start(1,true);return;}
+  connecting=false;
+  status.textContent='Эфир ещё не запустился. Нажмите «Запустить эфир».';
+ },12000);
  const request=element.play();
  if(request)request.catch(error=>{
-  if(element!==media())return;
-  status.textContent=error.name==='NotAllowedError'?'Браузер заблокировал автозапуск. Нажмите «Смотреть эфир».':'Не удалось открыть эфир. Проверьте интернет и повторите запуск.';
+  if(attempt!==generation||element!==media())return;
+  clearStartupTimer();connecting=false;
+  if(error.name==='AbortError')return;
+  status.textContent=error.name==='NotAllowedError'?
+   'Нажмите «Запустить эфир», чтобы начать просмотр.':
+   'Не удалось открыть эфир. Нажмите «Запустить эфир» для повторной попытки.';
  });
 }
 playButton.addEventListener('click',()=>{
- if(!media().paused){media().pause();return;}
- // Reload after a failed stream; keep a paused successful stream available.
- if(media().error){loaded=false;media().removeAttribute('src');media().load();}
- start();
+ if(playing&&!media().paused){
+  clearStartupTimer();generation++;connecting=false;playing=false;media().pause();return;
+ }
+ // A tap during a stuck initial load restarts the same channel, not another one.
+ start(0,connecting||!!media().error);
 });
 document.querySelectorAll('[data-channel]').forEach(button=>button.addEventListener('click',()=>{selectChannel(Number(button.dataset.channel));start();}));
-muteButton.addEventListener('click',()=>{muted=!muted;video.muted=muted;audio.muted=muted;updateMute();if(!muted && media().paused)start();});
+muteButton.addEventListener('click',()=>{muted=!muted;video.muted=muted;audio.muted=muted;updateMute();if(!muted && !playing)start(0,connecting||!!media().error);});
 fullscreen.addEventListener('click',async()=>{
  try{
   if(video.webkitEnterFullscreen){video.webkitEnterFullscreen();}
@@ -54,11 +73,11 @@ fullscreen.addEventListener('click',async()=>{
  }catch{status.textContent='Сначала запустите видео; затем включите полный экран.';}
 });
 for(const element of [video,audio]){
- element.addEventListener('playing',()=>{if(element===media()){status.textContent=channels[index].name+' · прямой эфир';playButton.textContent='Пауза';}});
- element.addEventListener('pause',()=>{if(element===media()&&loaded){playButton.textContent='Продолжить';status.textContent='Эфир на паузе.';}});
+ element.addEventListener('playing',()=>{if(element===media()&&loaded){clearStartupTimer();playing=true;connecting=false;status.textContent=channels[index].name+' · прямой эфир';playButton.textContent='Пауза';}});
+ element.addEventListener('pause',()=>{if(element===media()&&loaded&&!connecting){clearStartupTimer();playing=false;playButton.textContent='Продолжить';status.textContent='Эфир на паузе.';}});
  element.addEventListener('waiting',()=>{if(element===media()&&loaded)status.textContent='Загрузка эфира…';});
- element.addEventListener('error',()=>{if(element===media()&&loaded){status.textContent='Поток недоступен. Проверьте интернет или повторите позже.';playButton.textContent='Повторить запуск';}});
- element.addEventListener('ended',()=>{if(element===media()){loaded=false;playButton.textContent='Повторить запуск';status.textContent='Трансляция завершилась.';}});
+ element.addEventListener('error',()=>{if(element===media()&&loaded){clearStartupTimer();connecting=false;playing=false;status.textContent='Поток недоступен. Проверьте интернет или повторите позже.';playButton.textContent='Повторить запуск';}});
+ element.addEventListener('ended',()=>{if(element===media()&&loaded){clearStartupTimer();connecting=false;playing=false;loaded=false;playButton.textContent='Повторить запуск';status.textContent='Трансляция завершилась.';}});
  element.addEventListener('volumechange',()=>{if(element===media()){muted=element.muted;updateMute();}});
 }
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
@@ -67,4 +86,5 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catc
 video.muted=true;
 audio.muted=true;
 updateMute();
+selectChannel(0);
 start();
