@@ -119,4 +119,13 @@ updateMute();
 selectChannel(savedChannel());
 start();
 // Delay offline-shell caching until after the playback request has been issued.
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=5',{updateViaCache:'none'}).catch(()=>{});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=6',{updateViaCache:'none'}).catch(()=>{});
+
+const installButton=document.querySelector('#install');
+const installDialog=document.querySelector('#install-dialog');
+installButton.addEventListener('click',()=>installDialog.showModal());
+installDialog.addEventListener('click',event=>{
+ if(event.target!==installDialog)return;
+ const box=installDialog.getBoundingClientRect();
+ if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)installDialog.close();
+});
