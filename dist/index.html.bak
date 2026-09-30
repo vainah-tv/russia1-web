@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101723"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Эфир"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://live.smotrim.ru">
+<link rel="dns-prefetch" href="https://live-gtrk.smotrim.ru">
+<link rel="dns-prefetch" href="https://podcast-gtrk.smotrim.ru">
+<title>Эфир · ТВ и радио</title><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./assets/icon-180.png"><link rel="icon" href="./assets/icon-192.png"><link rel="stylesheet" href="./style.css?v=5"><script defer src="./app.js?v=5"></script>
+</head>
+<body><main>
+<header><span class="brand">ЭФИР<span class="brand-dot">.</span></span><span class="sub">ТВ / РАДИО</span></header>
+<section class="player" aria-label="Проигрыватель"><video id="video" controls autoplay muted playsinline preload="auto" aria-label="Телевизионная трансляция"></video><div id="radio-panel" hidden><img id="radio-art" src="./assets/radio_gr.png?v=5" width="1058" height="1058" alt="РАДИО ВАЙНАХ" decoding="async"></div></section>
+<div class="now"><h1 id="channel-name">РОССИЯ 1HD</h1><p id="status" role="status" aria-live="polite">Подключение к трансляции…</p></div>
+<div class="controls"><button id="play" class="primary">Смотреть эфир</button><button id="mute" aria-pressed="true">Включить звук</button><button id="fullscreen">Полный экран</button></div>
+<nav id="channels" aria-label="Каналы"><button data-channel="0" aria-pressed="true"><span class="num">01</span><span>РОССИЯ 1HD</span><small>ТЕЛЕВИДЕНИЕ</small></button><button data-channel="1" aria-pressed="false"><span class="num">02</span><span>РОССИЯ 24</span><small>ТЕЛЕВИДЕНИЕ</small></button><button data-channel="2" aria-pressed="false"><span class="num">03</span><span>ВАЙНАХ ТВ</span><small>ТЕЛЕВИДЕНИЕ</small></button><button data-channel="3" aria-pressed="false"><span class="num">04</span><span>РАДИО ВАЙНАХ</span><small>РАДИО</small></button></nav>
+<footer><a href="https://epg.iptvx.one/id/rossia1" target="_blank" rel="noopener noreferrer">Программа «Россия 1» ↗</a><p>На iPhone регулируйте громкость кнопками телефона.</p><details><summary>Как добавить на экран «Домой»</summary><p>Откройте ссылку в Safari, нажмите «Поделиться» и выберите «На экран „Домой“».</p></details><p><a href="https://gtrkvainah.ru/" target="_blank" rel="noopener noreferrer">НАШ САЙТ ↗</a></p></footer>
+<noscript>Для управления проигрывателем включите JavaScript в браузере.</noscript>
+</main></body></html>

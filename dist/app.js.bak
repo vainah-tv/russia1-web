@@ -6,11 +6,6 @@ const channels = [
  {name:'РАДИО ВАЙНАХ',url:'https://podcast-gtrk.smotrim.ru/vgtrk/grozniy/radio_russia/track_1001_85855c03/chunklist.m3u8',radio:true}
 ];
 const video=document.querySelector('#video');
-const player=document.querySelector('#player');
-const epgOverlay=document.querySelector('#epg-overlay');
-const epgFrame=document.querySelector('#epg-frame');
-const epgToggle=document.querySelector('#epg-toggle');
-const epgClose=document.querySelector('#epg-close');
 const radioPanel=document.querySelector('#radio-panel');
 const status=document.querySelector('#status'),playButton=document.querySelector('#play');
 const muteButton=document.querySelector('#mute'),fullscreen=document.querySelector('#fullscreen');
@@ -39,8 +34,6 @@ function selectChannel(next){
  document.querySelector('#channel-name').textContent=channels[index].name;
  document.querySelectorAll('[data-channel]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.channel)===index)));
  fullscreen.disabled=!!channels[index].radio;
- epgToggle.disabled=index!==0;
- if(index!==0)epgOverlay.hidden=true;
  playButton.textContent='Запустить эфир';
  status.textContent='Подключение к трансляции…';
 }
@@ -86,42 +79,15 @@ muteButton.addEventListener('click',()=>{
  muted=!muted;video.muted=muted;updateMute();
  if(!muted&&!playing)start(0,connecting||!!video.error);
 });
-function setPseudoFullscreen(on){
- player.classList.toggle('pseudo-fullscreen',on);
- document.documentElement.style.overflow=on?'hidden':'';
- document.body.style.overflow=on?'hidden':'';
-}
-async function toggleFullscreen(){
+fullscreen.addEventListener('click',async()=>{
  try{
   if(channels[index].radio)return;
-  if(document.fullscreenElement){await document.exitFullscreen();return;}
-  if(player.classList.contains('pseudo-fullscreen')){setPseudoFullscreen(false);return;}
-  if(player.requestFullscreen){await player.requestFullscreen();return;}
-  setPseudoFullscreen(true);
- }catch{setPseudoFullscreen(!player.classList.contains('pseudo-fullscreen'));}
-}
-fullscreen.addEventListener('click',toggleFullscreen);
-player.addEventListener('dblclick',event=>{
- if(event.target.closest('.epg-card'))return;
- toggleFullscreen();
+  if(video.webkitEnterFullscreen){video.webkitEnterFullscreen();}
+  else if(document.fullscreenElement){await document.exitFullscreen();}
+  else if(video.requestFullscreen){await video.requestFullscreen();}
+  else status.textContent='Используйте кнопку полного экрана в плеере.';
+ }catch{status.textContent='Сначала запустите видео; затем включите полный экран.';}
 });
-let lastTouch=0;
-player.addEventListener('touchend',event=>{
- if(event.target.closest('.epg-card'))return;
- const now=Date.now();
- if(now-lastTouch<320){event.preventDefault();toggleFullscreen();lastTouch=0;}
- else lastTouch=now;
-},{passive:false});
-document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)setPseudoFullscreen(false);});
-function openEpg(){
- if(epgFrame.src==='about:blank')epgFrame.src='https://epg.iptvx.one/id/rossia1';
- epgOverlay.hidden=false;
-}
-function closeEpg(){epgOverlay.hidden=true;}
-epgToggle.addEventListener('click',openEpg);
-epgClose.addEventListener('click',closeEpg);
-epgOverlay.addEventListener('click',event=>{if(event.target===epgOverlay)closeEpg();});
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!epgOverlay.hidden)closeEpg();});
 video.addEventListener('playing',()=>{
  if(!loaded)return;
  clearStartupTimer();playing=true;connecting=false;
@@ -154,4 +120,4 @@ updateMute();
 selectChannel(savedChannel());
 start();
 // Delay offline-shell caching until after the playback request has been issued.
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=6',{updateViaCache:'none'}).catch(()=>{});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=5',{updateViaCache:'none'}).catch(()=>{});
