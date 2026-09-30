@@ -1,8 +1,9 @@
 'use strict';
 const channels = [
  {name:'РОССИЯ 1HD',url:'https://live.smotrim.ru/vgtrk/0/russia1-hd/1080p.m3u8'},
+ {name:'РОССИЯ 24',url:'https://live-gtrk.smotrim.ru/vgtrk/grozniy/russia24-sd/track_103_35f01932/chunklist.m3u8'},
  {name:'ВАЙНАХ ТВ',url:'https://live-gtrk.smotrim.ru/vgtrk/grozniy/russia1-sd/track_103_947c7bd7/chunklist.m3u8'},
- {name:'РАДИО ГРОЗНЫЙ',url:'https://podcast-gtrk.smotrim.ru/vgtrk/grozniy/radio_russia/track_1001_85855c03/chunklist.m3u8',radio:true}
+ {name:'РАДИО ВАЙНАХ',url:'https://podcast-gtrk.smotrim.ru/vgtrk/grozniy/radio_russia/track_1001_85855c03/chunklist.m3u8',radio:true}
 ];
 const video=document.querySelector('#video');
 const radioPanel=document.querySelector('#radio-panel');
@@ -119,13 +120,4 @@ updateMute();
 selectChannel(savedChannel());
 start();
 // Delay offline-shell caching until after the playback request has been issued.
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=6',{updateViaCache:'none'}).catch(()=>{});
-
-const installButton=document.querySelector('#install');
-const installDialog=document.querySelector('#install-dialog');
-installButton.addEventListener('click',()=>installDialog.showModal());
-installDialog.addEventListener('click',event=>{
- if(event.target!==installDialog)return;
- const box=installDialog.getBoundingClientRect();
- if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)installDialog.close();
-});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=5',{updateViaCache:'none'}).catch(()=>{});
