@@ -1,7 +1,7 @@
 import {cp,mkdir,rm,readFile,stat} from 'node:fs/promises';
 const root=new URL('../',import.meta.url);
 const web=new URL('web/',root),dist=new URL('dist/',root);
-for(const file of ['index.html','style.css','app.js','sw.js','manifest.webmanifest','assets/radio_gr.png','assets/icon-180.png','assets/icon-192.png','assets/icon-512.png']){
+for(const file of ['index.html','style.css','app.js','screen-awake.js','sw.js','manifest.webmanifest','assets/radio_gr.png','assets/icon-180.png','assets/icon-192.png','assets/icon-512.png']){
  if(!(await stat(new URL(file,web))).isFile())throw Error('Missing '+file);
 }
 const manifest=JSON.parse(await readFile(new URL('manifest.webmanifest',web),'utf8'));
